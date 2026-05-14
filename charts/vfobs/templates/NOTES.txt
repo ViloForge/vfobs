@@ -1,0 +1,15 @@
+vfobs has been installed into namespace {{ .Release.Namespace }}.
+
+To verify the deployment is healthy, port-forward and hit /healthz:
+
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "vfobs.fullname" . }} 8080:{{ .Values.service.port }} &
+  curl http://localhost:8080/healthz
+
+POSTing events requires the ingest token from the Secret
+{{ .Values.ingestToken.secret.name }} (key {{ .Values.ingestToken.secret.key }}):
+
+  TOKEN=$(kubectl -n {{ .Release.Namespace }} get secret {{ .Values.ingestToken.secret.name }} -o jsonpath='{.data.{{ .Values.ingestToken.secret.key }}}' | base64 -d)
+  curl -X POST http://localhost:8080/events \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{ "type": "task.heartbeat", "v": 1, "workgraph_id": "wg_demo", "task_id": "t_demo", "source": "demo", "timestamp": "2026-05-14T12:00:00Z", "data": {"at": "2026-05-14T12:00:00Z"} }'
