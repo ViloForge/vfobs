@@ -1,0 +1,2198 @@
+{
+  "anomaly.stuck_detected": {
+    "$defs": {
+      "AnomalyStuckDetectedData": {
+        "properties": {
+          "last_activity_at": {
+            "format": "date-time",
+            "title": "Last Activity At",
+            "type": "string"
+          },
+          "last_seen_event_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Last Seen Event Type"
+          },
+          "t_m_seconds": {
+            "title": "T M Seconds",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "last_activity_at",
+          "t_m_seconds"
+        ],
+        "title": "AnomalyStuckDetectedData",
+        "type": "object"
+      },
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/AnomalyStuckDetectedData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "anomaly.stuck_detected",
+        "default": "anomaly.stuck_detected",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "AnomalyStuckDetected",
+    "type": "object"
+  },
+  "gate.failed": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "GateFailedData": {
+        "properties": {
+          "exit_code": {
+            "title": "Exit Code",
+            "type": "integer"
+          },
+          "gate_name": {
+            "title": "Gate Name",
+            "type": "string"
+          },
+          "stderr_tail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Stderr Tail"
+          }
+        },
+        "required": [
+          "gate_name",
+          "exit_code"
+        ],
+        "title": "GateFailedData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/GateFailedData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "gate.failed",
+        "default": "gate.failed",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "GateFailed",
+    "type": "object"
+  },
+  "gate.passed": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "GatePassedData": {
+        "properties": {
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Duration Ms"
+          },
+          "gate_name": {
+            "title": "Gate Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "gate_name"
+        ],
+        "title": "GatePassedData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/GatePassedData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "gate.passed",
+        "default": "gate.passed",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "GatePassed",
+    "type": "object"
+  },
+  "gate.started": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "GateStartedData": {
+        "properties": {
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "gate_name": {
+            "title": "Gate Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "gate_name",
+          "command"
+        ],
+        "title": "GateStartedData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/GateStartedData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "gate.started",
+        "default": "gate.started",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "GateStarted",
+    "type": "object"
+  },
+  "harness.tool_call": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "HarnessToolCallData": {
+        "properties": {
+          "tool_args_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tool Args Summary"
+          },
+          "tool_name": {
+            "title": "Tool Name",
+            "type": "string"
+          },
+          "turn_number": {
+            "title": "Turn Number",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "turn_number",
+          "tool_name"
+        ],
+        "title": "HarnessToolCallData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/HarnessToolCallData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "harness.tool_call",
+        "default": "harness.tool_call",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "HarnessToolCall",
+    "type": "object"
+  },
+  "harness.turn_completed": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "HarnessTurnCompletedData": {
+        "properties": {
+          "completion_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Completion Tokens"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Duration Ms"
+          },
+          "turn_number": {
+            "title": "Turn Number",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "turn_number"
+        ],
+        "title": "HarnessTurnCompletedData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/HarnessTurnCompletedData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "harness.turn_completed",
+        "default": "harness.turn_completed",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "HarnessTurnCompleted",
+    "type": "object"
+  },
+  "harness.turn_started": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "HarnessTurnStartedData": {
+        "properties": {
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "prompt_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Prompt Tokens"
+          },
+          "turn_number": {
+            "title": "Turn Number",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "turn_number",
+          "model"
+        ],
+        "title": "HarnessTurnStartedData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/HarnessTurnStartedData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "harness.turn_started",
+        "default": "harness.turn_started",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "HarnessTurnStarted",
+    "type": "object"
+  },
+  "judge.decision": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "JudgeDecisionData": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "approved",
+              "changes_requested",
+              "rejected"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Notes"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "title": "JudgeDecisionData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/JudgeDecisionData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "judge.decision",
+        "default": "judge.decision",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "JudgeDecision",
+    "type": "object"
+  },
+  "judge.review_submitted": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "JudgeReviewSubmittedData": {
+        "properties": {
+          "per_ac_verdicts": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Per Ac Verdicts",
+            "type": "object"
+          }
+        },
+        "required": [
+          "per_ac_verdicts"
+        ],
+        "title": "JudgeReviewSubmittedData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/JudgeReviewSubmittedData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "judge.review_submitted",
+        "default": "judge.review_submitted",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "JudgeReviewSubmitted",
+    "type": "object"
+  },
+  "judge.started": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "JudgeStartedData": {
+        "properties": {
+          "judge_agent_id": {
+            "title": "Judge Agent Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "judge_agent_id"
+        ],
+        "title": "JudgeStartedData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/JudgeStartedData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "judge.started",
+        "default": "judge.started",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "JudgeStarted",
+    "type": "object"
+  },
+  "task.claimed": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "TaskClaimedData": {
+        "properties": {
+          "claimed_by_agent_id": {
+            "title": "Claimed By Agent Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "claimed_by_agent_id"
+        ],
+        "title": "TaskClaimedData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/TaskClaimedData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "task.claimed",
+        "default": "task.claimed",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "TaskClaimed",
+    "type": "object"
+  },
+  "task.heartbeat": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "TaskHeartbeatData": {
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "current_turn": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Current Turn"
+          }
+        },
+        "required": [
+          "at"
+        ],
+        "title": "TaskHeartbeatData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/TaskHeartbeatData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "task.heartbeat",
+        "default": "task.heartbeat",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "TaskHeartbeat",
+    "type": "object"
+  },
+  "task.state_changed": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "ExecutionSummary": {
+        "properties": {
+          "cost_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cost Usd"
+          },
+          "num_turns": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Num Turns"
+          },
+          "total_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Total Tokens"
+          }
+        },
+        "title": "ExecutionSummary",
+        "type": "object"
+      },
+      "TaskStateChangedData": {
+        "properties": {
+          "execution_summary": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ExecutionSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "from_status": {
+            "title": "From Status",
+            "type": "string"
+          },
+          "to_status": {
+            "title": "To Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from_status",
+          "to_status"
+        ],
+        "title": "TaskStateChangedData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/TaskStateChangedData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "task.state_changed",
+        "default": "task.state_changed",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "TaskStateChanged",
+    "type": "object"
+  },
+  "task.workdir_changed": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "TaskWorkdirChangedData": {
+        "properties": {
+          "branch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Branch"
+          },
+          "commits": {
+            "title": "Commits",
+            "type": "integer"
+          },
+          "files_changed": {
+            "title": "Files Changed",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "files_changed",
+          "commits"
+        ],
+        "title": "TaskWorkdirChangedData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/TaskWorkdirChangedData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "task.workdir_changed",
+        "default": "task.workdir_changed",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "TaskWorkdirChanged",
+    "type": "object"
+  },
+  "workgraph.completed": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "WorkgraphCompletedData": {
+        "properties": {
+          "task_count": {
+            "title": "Task Count",
+            "type": "integer"
+          },
+          "terminal_status": {
+            "title": "Terminal Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "terminal_status",
+          "task_count"
+        ],
+        "title": "WorkgraphCompletedData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/WorkgraphCompletedData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "workgraph.completed",
+        "default": "workgraph.completed",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "WorkgraphCompleted",
+    "type": "object"
+  },
+  "workgraph.created": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "WorkgraphCreatedData": {
+        "properties": {
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "target_repos": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Target Repos",
+            "type": "array"
+          }
+        },
+        "required": [
+          "created_by",
+          "kind",
+          "target_repos"
+        ],
+        "title": "WorkgraphCreatedData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/WorkgraphCreatedData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "workgraph.created",
+        "default": "workgraph.created",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "WorkgraphCreated",
+    "type": "object"
+  },
+  "workgraph.state_changed": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "WorkgraphStateChangedData": {
+        "properties": {
+          "from_status": {
+            "title": "From Status",
+            "type": "string"
+          },
+          "to_status": {
+            "title": "To Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from_status",
+          "to_status"
+        ],
+        "title": "WorkgraphStateChangedData",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Agent Id"
+      },
+      "classification": {
+        "$ref": "#/$defs/Classification",
+        "default": "internal"
+      },
+      "cluster_id": {
+        "default": "vafi-dev",
+        "title": "Cluster Id",
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/$defs/WorkgraphStateChangedData"
+      },
+      "org_id": {
+        "default": "viloforge",
+        "title": "Org Id",
+        "type": "string"
+      },
+      "source": {
+        "minLength": 1,
+        "title": "Source",
+        "type": "string"
+      },
+      "task_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Task Id"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "trace_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trace Id"
+      },
+      "type": {
+        "const": "workgraph.state_changed",
+        "default": "workgraph.state_changed",
+        "title": "Type",
+        "type": "string"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "minLength": 1,
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "source",
+      "timestamp",
+      "data"
+    ],
+    "title": "WorkgraphStateChanged",
+    "type": "object"
+  }
+}
