@@ -35,9 +35,10 @@ spec:
         app.kubernetes.io/component: migrate
     spec:
       restartPolicy: OnFailure
-      {{- if .Values.serviceAccount.create }}
-      serviceAccountName: {{ include "vfobs.fullname" . }}
-      {{- end }}
+      # Intentionally no serviceAccountName — this Job is an ArgoCD PreSync
+      # hook that runs BEFORE the chart's regular Sync creates the
+      # ServiceAccount. The Job's DB access comes via env vars, not via
+      # SA-bound IAM/RBAC; the default SA in vfobs-dev is sufficient.
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
