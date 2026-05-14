@@ -25,7 +25,8 @@ COPY --from=builder /build/alembic /app/alembic
 COPY --from=builder /build/alembic.ini /app/alembic.ini
 COPY src /app/src
 
-ENV PYTHONPATH=/app/src:/app/lib
+ENV PYTHONPATH=/app/src:/app/lib \
+    PATH=/app/lib/bin:${PATH}
 
 EXPOSE 8080
 

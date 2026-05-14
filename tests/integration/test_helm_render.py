@@ -78,6 +78,39 @@ def test_helm_lint_clean():
 
 @pytest.mark.integration
 @requires_helm
+def test_migrate_job_renders_with_hook_annotations():
+    docs = _render(DEV_VALUES)
+    jobs = [d for d in docs if d["kind"] == "Job"]
+    assert len(jobs) == 1, f"expected one migrate Job, got {len(jobs)}"
+    job = jobs[0]
+    ann = job["metadata"]["annotations"]
+    assert ann["helm.sh/hook"] == "pre-install,pre-upgrade"
+    assert ann["helm.sh/hook-delete-policy"] == "before-hook-creation"
+    assert ann["argocd.argoproj.io/hook"] == "PreSync"
+    # vfobs_app password is read from the runtime Secret's POSTGRES_PASSWORD
+    # key — must agree with the migration's CREATE ROLE statement.
+    env = job["spec"]["template"]["spec"]["containers"][0]["env"]
+    env_names = {e["name"] for e in env}
+    assert env_names == {"VFOBS_DATABASE_URL", "VFOBS_APP_DB_PASSWORD", "VFOBS_INGEST_TOKEN"}
+
+
+@pytest.mark.integration
+@requires_helm
+def test_migrate_job_suppressed_when_disabled(tmp_path):
+    values = tmp_path / "values.yaml"
+    values.write_text(
+        "image:\n  repository: viloforge/vfobs\n  tag: '0.0.1'\n"
+        "eso:\n  enabled: true\n  secretStore:\n    name: aws-sm\n  refreshInterval: 1h\n"
+        "monitoring:\n  enabled: false\n"
+        "migrate:\n  enabled: false\n"
+    )
+    docs = _render(values)
+    jobs = [d for d in docs if d["kind"] == "Job"]
+    assert jobs == []
+
+
+@pytest.mark.integration
+@requires_helm
 def test_externalsecret_disabled_when_eso_disabled(tmp_path):
     no_eso = tmp_path / "values.yaml"
     no_eso.write_text(
