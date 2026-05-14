@@ -23,8 +23,22 @@ test-integration:
 test-contract:
 	pytest -m contract
 
+KIND_CLUSTER ?= vfobs-scenario
+SKIP_PREPARE ?= 0
+
+scenario-prepare:
+	bash scripts/scenario/prepare.sh
+
+scenario-teardown:
+	bash scripts/scenario/teardown.sh
+
 test-scenario:
-	pytest -m scenario
+ifeq ($(SKIP_PREPARE),1)
+	pytest -m scenario tests/scenario/
+else
+	$(MAKE) scenario-prepare
+	pytest -m scenario tests/scenario/
+endif
 
 test-all:
 	pytest -m "unit or integration or contract or scenario"
