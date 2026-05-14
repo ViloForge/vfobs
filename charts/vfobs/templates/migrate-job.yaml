@@ -1,0 +1,98 @@
+{{- if .Values.migrate.enabled }}
+# Pre-deploy schema migration. Runs `alembic upgrade head` with
+# **privileged** DB creds (the vtf user, which is the cluster
+# superuser of the shared vtf-db Postgres per OIQ2). The migration
+# creates the `vfobs` schema, the `vfobs_app` role with the password
+# from vfobs-secrets.POSTGRES_PASSWORD, and grants. Subsequent runs
+# (re-applies) are idempotent — alembic head check + the DO $$
+# IF NOT EXISTS $$ block around CREATE ROLE.
+#
+# Hooks:
+#   helm pre-install/pre-upgrade — for `helm install` / `helm upgrade`
+#   argocd PreSync                — for ArgoCD-driven syncs
+# BeforeHookCreation delete-policy means the prior Job is purged before
+# a new one runs (Job spec is immutable; without this, a tag bump would
+# fail to redeploy).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "vfobs.fullname" . }}-migrate
+  labels:
+    {{- include "vfobs.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+    "argocd.argoproj.io/hook": PreSync
+    "argocd.argoproj.io/hook-delete-policy": BeforeHookCreation
+spec:
+  backoffLimit: {{ .Values.migrate.backoffLimit }}
+  ttlSecondsAfterFinished: {{ .Values.migrate.ttlSecondsAfterFinished }}
+  template:
+    metadata:
+      labels:
+        {{- include "vfobs.labels" . | nindent 8 }}
+        app.kubernetes.io/component: migrate
+    spec:
+      restartPolicy: OnFailure
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "vfobs.fullname" . }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: migrate
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          workingDir: /app
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "==> waiting for database TCP readiness"
+              # Probe by attempting an asyncpg connection until success.
+              for i in $(seq 1 30); do
+                python -c "
+              import asyncio, asyncpg, os, re
+              url = os.environ['VFOBS_DATABASE_URL']
+              # asyncpg wants postgresql://; strip any SQLAlchemy +driver suffix
+              clean = re.sub(r'^postgresql\+\w+://', 'postgresql://', url)
+              async def probe():
+                  conn = await asyncpg.connect(clean)
+                  await conn.close()
+              asyncio.run(probe())
+              " >/dev/null 2>&1 && break
+                echo "   attempt $i/30 — database not ready, waiting..."
+                sleep 2
+              done
+              echo "==> running alembic upgrade head"
+              alembic upgrade head
+              echo "==> migration done"
+          env:
+            # Privileged URL (vtf superuser) — only the migrate Job sees this.
+            - name: VFOBS_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.migrate.bootstrapSecretName }}
+                  key:  {{ .Values.migrate.bootstrapSecretKey }}
+            # vfobs_app role password — written by the migration into
+            # CREATE ROLE; same value the runtime Deployment reads via
+            # DATABASE_URL.
+            - name: VFOBS_APP_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.dsnSecret.name }}
+                  key:  POSTGRES_PASSWORD
+            # INGEST_TOKEN is required by Settings(BaseSettings) loading
+            # even though the migrate Job doesn't use the token. Without
+            # it, the import-time Settings construction in alembic env.py
+            # fails validation. Use the same secret the runtime uses.
+            - name: VFOBS_INGEST_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ingestToken.secret.name }}
+                  key:  {{ .Values.ingestToken.secret.key }}
+{{- end }}

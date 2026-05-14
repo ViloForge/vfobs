@@ -15,20 +15,29 @@ resources:
 
 env: []              # free-form non-secret env
 
+# Runtime DB connection — the vfobs_app role. Secret key is read at
+# Deployment time; production uses ExternalSecret managed elsewhere
+# (argo/products/vfobs-dev/secrets/vfobs-secrets.yaml in viloforge-platform).
 database:
   dsnSecret:
     name: vfobs-secrets
-    key: database-url   # ESO writes this key
+    key: DATABASE_URL
 
+# Write-API auth — Bearer token.
 ingestToken:
   secret:
     name: vfobs-secrets
-    key: ingest-token   # ESO writes this key
+    key: INGEST_TOKEN
 
+imagePullSecrets: []
+
+# Chart-managed ExternalSecret OFF in production deploys (those wire
+# the ExternalSecret in the platform repo). Default-on remains for any
+# standalone helm-install path.
 eso:
   enabled: true
   secretStore:
-    name: vault-backend
+    name: aws-sm
   refreshInterval: 1h
 
 monitoring:
@@ -40,3 +49,20 @@ service:
 
 serviceAccount:
   create: true
+
+# Schema migration via Helm pre-install/pre-upgrade hook Job. Also runs
+# as ArgoCD PreSync so the migration completes before the new Deployment
+# rolls out. Uses privileged DB creds from a separate Secret
+# (bootstrapSecretName) — the existing vtf user, which is the superuser
+# of the shared vtf-db Postgres (per OIQ2). The vfobs_app role's password
+# comes from the runtime vfobs-secrets so migration sets the SAME value
+# the Deployment uses.
+migrate:
+  enabled: true
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 600
+  # Secret containing the privileged DATABASE_URL (vtf user). Defaults to
+  # vfobs-bootstrap-creds (the production ExternalSecret). Override to a
+  # local Secret in test scenarios.
+  bootstrapSecretName: vfobs-bootstrap-creds
+  bootstrapSecretKey: DATABASE_URL

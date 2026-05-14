@@ -27,3 +27,10 @@ eso:
 
 monitoring:
   enabled: false
+
+# Scenario script runs alembic out-of-band in prepare.sh (so the schema
+# bootstrap can target a port-forwarded local Postgres without needing
+# privileged in-cluster creds). Disable the chart's migrate Job to avoid
+# a double-run + the bootstrap-secret dependency.
+migrate:
+  enabled: false
