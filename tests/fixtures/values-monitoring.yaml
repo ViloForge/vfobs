@@ -1,0 +1,12 @@
+image:
+  repository: viloforge/vfobs
+  tag: "0.0.1"
+
+eso:
+  enabled: true
+  secretStore:
+    name: vault-backend
+  refreshInterval: 1h
+
+monitoring:
+  enabled: true
