@@ -1,0 +1,29 @@
+image:
+  repository: viloforge/vfobs
+  tag: scenario
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+env:
+  - name: VFOBS_LOG_LEVEL
+    value: INFO
+
+database:
+  dsnSecret:
+    name: vfobs-scenario-secrets
+    key: database-url
+
+ingestToken:
+  secret:
+    name: vfobs-scenario-secrets
+    key: ingest-token
+
+eso:
+  enabled: false           # scenario uses a literal Secret (see scenario-secrets.yaml)
+  secretStore:
+    name: noop
+  refreshInterval: 1h
+
+monitoring:
+  enabled: false

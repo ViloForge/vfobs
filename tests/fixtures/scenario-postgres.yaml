@@ -1,0 +1,74 @@
+# Minimal Postgres for the scenario test. Uses the same image
+# (postgres:15-alpine) as the testcontainers integration tests for
+# consistency. The bitnami/postgresql Helm chart referenced earlier
+# was abandoned after the 2025 Bitnami image-deprecation (bitnami/*
+# images on Docker Hub were removed); this manifest avoids the
+# moving-target dependency entirely.
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vfobs-pg-secret
+type: Opaque
+stringData:
+  POSTGRES_USER: vfobs_app
+  POSTGRES_PASSWORD: devpassword
+  POSTGRES_DB: vfobs
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vfobs-pg
+  labels:
+    app.kubernetes.io/name: vfobs-pg
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vfobs-pg
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: vfobs-pg
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: pg
+              containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: vfobs-pg-secret
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "vfobs_app", "-d", "vfobs"]
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "vfobs_app", "-d", "vfobs"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vfobs-pg-postgresql
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: pg
+      protocol: TCP
+      name: pg
+  selector:
+    app.kubernetes.io/name: vfobs-pg
