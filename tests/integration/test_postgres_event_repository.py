@@ -226,3 +226,31 @@ async def test_lsp_cost_summary_dedup_and_scope(repo_under_test):
     assert cs.total_cost_usd == pytest.approx(0.40)  # latest run wins
     assert cs.total_tokens == 99
     assert cs.total_turns == 5
+
+
+# ---- WG2-T2 LSP: tail + count helpers, one contract, both impls ---------
+
+
+@pytest.mark.integration
+async def test_lsp_find_last_and_count_helpers(repo_under_test):
+    assert await repo_under_test.find_last_by_workgraph("none") is None
+    assert await repo_under_test.count_by_workgraph("none") == 0
+    assert await repo_under_test.find_last_by_task("none") is None
+
+    await repo_under_test.store(
+        _state_changed(workgraph_id="wg_h", task_id="t_h")
+    )
+    last_id = await repo_under_test.store(
+        _state_changed(workgraph_id="wg_h", task_id="t_h")
+    )
+    await repo_under_test.store(
+        _state_changed(workgraph_id="wg_other", task_id="t_o")
+    )
+
+    tail = await repo_under_test.find_last_by_workgraph("wg_h")
+    assert tail is not None and tail.id == last_id  # highest id wins
+    assert tail.event.workgraph_id == "wg_h"
+    assert await repo_under_test.count_by_workgraph("wg_h") == 2
+    task_tail = await repo_under_test.find_last_by_task("t_h")
+    assert task_tail is not None and task_tail.id == last_id
+    assert await repo_under_test.count_by_task("t_h") == 2

@@ -171,6 +171,29 @@ class EventRepository(ABC):
         ValueError). Counts the latest execution_summary per task
         (verifier F2 — no rework double-count)."""
 
+    # T2 resource-endpoint helpers. D-T2-1: the spec called these
+    # "private, ABC stays four"; but it also mandates LSP-parametrized
+    # testing of them — LSP-tested behavior IS contract, so the
+    # SOLID-correct home is the ABC. (The "four" constraint was about
+    # not bloating T1's read scope, not forbidding T2 contract methods.)
+    @abstractmethod
+    async def find_last_by_workgraph(
+        self, workgraph_id: str
+    ) -> StoredEvent | None:
+        """Highest-id event for a workgraph, or None."""
+
+    @abstractmethod
+    async def find_last_by_task(self, task_id: str) -> StoredEvent | None:
+        """Highest-id event for a task, or None."""
+
+    @abstractmethod
+    async def count_by_workgraph(self, workgraph_id: str) -> int:
+        """Total event count for a workgraph."""
+
+    @abstractmethod
+    async def count_by_task(self, task_id: str) -> int:
+        """Total event count for a task."""
+
 
 class PostgresEventRepository(EventRepository):
     def __init__(self, engine: AsyncEngine) -> None:
@@ -312,6 +335,35 @@ class PostgresEventRepository(EventRepository):
             sample_event_count=int(row["sample_event_count"]),
         )
 
+    async def _last(self, col: str, value: str) -> "StoredEvent | None":
+        stmt = sa.text(
+            f"{_SELECT_COLS} WHERE {col} = :v ORDER BY id DESC LIMIT 1"
+        )
+        async with self._engine.connect() as conn:
+            row = (await conn.execute(stmt, {"v": value})).mappings().one_or_none()
+        return _row_to_stored(row) if row else None
+
+    async def _count(self, col: str, value: str) -> int:
+        stmt = sa.text(
+            f"SELECT COUNT(*) AS n FROM vfobs.events WHERE {col} = :v"
+        )
+        async with self._engine.connect() as conn:
+            return int((await conn.execute(stmt, {"v": value})).scalar_one())
+
+    async def find_last_by_workgraph(
+        self, workgraph_id: str
+    ) -> "StoredEvent | None":
+        return await self._last("workgraph_id", workgraph_id)
+
+    async def find_last_by_task(self, task_id: str) -> "StoredEvent | None":
+        return await self._last("task_id", task_id)
+
+    async def count_by_workgraph(self, workgraph_id: str) -> int:
+        return await self._count("workgraph_id", workgraph_id)
+
+    async def count_by_task(self, task_id: str) -> int:
+        return await self._count("task_id", task_id)
+
 
 class InMemoryEventRepository(EventRepository):
     def __init__(self) -> None:
@@ -429,3 +481,32 @@ class InMemoryEventRepository(EventRepository):
             task_count=len(latest),
             sample_event_count=len(latest),
         )
+
+    def _matching(self, getter, value: str) -> list[tuple[int, Event]]:
+        return [
+            (eid, ev)
+            for eid, ev in self._events.items()
+            if getter(ev) == value
+        ]
+
+    async def find_last_by_workgraph(
+        self, workgraph_id: str
+    ) -> StoredEvent | None:
+        m = self._matching(lambda e: e.workgraph_id, workgraph_id)
+        if not m:
+            return None
+        eid, ev = max(m, key=lambda t: t[0])
+        return StoredEvent(id=eid, event=ev)
+
+    async def find_last_by_task(self, task_id: str) -> StoredEvent | None:
+        m = self._matching(lambda e: e.task_id, task_id)
+        if not m:
+            return None
+        eid, ev = max(m, key=lambda t: t[0])
+        return StoredEvent(id=eid, event=ev)
+
+    async def count_by_workgraph(self, workgraph_id: str) -> int:
+        return len(self._matching(lambda e: e.workgraph_id, workgraph_id))
+
+    async def count_by_task(self, task_id: str) -> int:
+        return len(self._matching(lambda e: e.task_id, task_id))
