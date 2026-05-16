@@ -86,6 +86,42 @@ The scenario test guards against defects that unit + integration miss:
   to the bitnami postgres may not have come up. Re-run prepare; the
   script waits for TCP readiness but slow Docker can extend bootup.
 
+## WG2 read-API scenario (vtfstub sidecar)
+
+`tests/scenario/test_read_api_roundtrip.py` exercises the WG2 read
+endpoints end-to-end. It needs the deployed vfobs to have a real
+vtaskforge target, so `scenario-prepare` (step 5b) now also:
+
+1. builds `viloforge/vtfstub:scenario` from
+   `scripts/scenario/vtfstub/` (a tiny FastAPI stub: `/healthz`,
+   `/v2/auth/whoami`, `/v2/workgraphs/<id>/`, `/v2/tasks/<id>/` —
+   any non-empty bearer is accepted),
+2. `kind load`s it and applies
+   `tests/fixtures/scenario-vtfstub.yaml` (Deployment + Service
+   `vtfstub:8080`), waiting for readiness.
+
+`values-scenario.yaml` sets `VFOBS_VTASKFORGE_URL=http://vtfstub:8080`
+so the deployed vfobs lifespan resolves the production `VtfClient`
++ `VtfTokenAuth` and the read API is wired (per D-T0-1, an unset
+URL would instead leave reads unwired — here it's set).
+
+Run: same `make scenario-prepare && make test-scenario`. The three
+read tests cover the full seeded read path (incl. F2 rework
+de-dup), the 401-without-token gate on every read endpoint, and
+250-event cursor pagination.
+
+Stub purpose: it gives `VtfClient` a real network target so the
+*deployed shape* is exercised. It does NOT assert vfobs-vs-real-
+vtaskforge agreement — that is a WG5+ canary.
+
+Troubleshooting addendum:
+- **vtfstub pod not ready** — `kubectl --context kind-vfobs-scenario
+  -n vfobs-test logs -l app.kubernetes.io/name=vtfstub`; usually a
+  slow pip layer on first build (image is cached after).
+- **read endpoints 503/unwired** — confirm
+  `VFOBS_VTASKFORGE_URL` is in the vfobs Deployment env and the
+  `vtfstub` Service resolves in-namespace.
+
 ## CI wiring (future)
 
 Out of scope for WG1 per the implementation plan. When CI lands as a

@@ -8,6 +8,12 @@ replicaCount: 1
 env:
   - name: VFOBS_LOG_LEVEL
     value: INFO
+  # WG2-T5: point the deployed VtfClient at the in-cluster vtfstub
+  # (tests/fixtures/scenario-vtfstub.yaml). Same namespace -> short
+  # service name resolves. With this set, the lifespan resolves the
+  # production VtfClient + VtfTokenAuth so the read API is wired.
+  - name: VFOBS_VTASKFORGE_URL
+    value: "http://vtfstub:8080"
 
 database:
   dsnSecret:

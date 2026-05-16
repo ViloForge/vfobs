@@ -86,6 +86,17 @@ docker build -t "viloforge/vfobs:$IMAGE_TAG" .
 echo "==> loading image into kind"
 kind load docker-image "viloforge/vfobs:$IMAGE_TAG" --name "$CLUSTER"
 
+# ---- 5b. vtfstub (WG2-T5) ----------------------------------------------------
+
+echo "==> building vtfstub image"
+docker build -t "viloforge/vtfstub:$IMAGE_TAG" scripts/scenario/vtfstub
+echo "==> loading vtfstub image into kind"
+kind load docker-image "viloforge/vtfstub:$IMAGE_TAG" --name "$CLUSTER"
+echo "==> deploying vtfstub"
+kubectl --context "kind-$CLUSTER" apply -f tests/fixtures/scenario-vtfstub.yaml -n "$NS"
+kubectl --context "kind-$CLUSTER" wait --for=condition=ready pod \
+  -l app.kubernetes.io/name=vtfstub -n "$NS" --timeout=120s
+
 # ---- 6. literal secret + helm install vfobs ---------------------------------
 
 echo "==> applying scenario secret (literal, ESO disabled)"
