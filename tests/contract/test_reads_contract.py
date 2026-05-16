@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from vfobs.api.cost import AgentCostResponse, WorkgraphCostResponse
 from vfobs.api.dto import (
     EventsFilterResponse,
     TaskEventsResponse,
@@ -23,6 +24,8 @@ def _schemas() -> dict:
         "TaskReadResponse": TaskReadResponse.model_json_schema(),
         "TaskEventsResponse": TaskEventsResponse.model_json_schema(),
         "EventsFilterResponse": EventsFilterResponse.model_json_schema(),
+        "WorkgraphCostResponse": WorkgraphCostResponse.model_json_schema(),
+        "AgentCostResponse": AgentCostResponse.model_json_schema(),
     }
 
 

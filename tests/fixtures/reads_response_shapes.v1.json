@@ -1,4 +1,62 @@
 {
+  "AgentCostResponse": {
+    "$defs": {
+      "CostSummary": {
+        "description": "Aggregate cost rollup (plan \u00a7D3). Frozen \u2014 every field declared\n(R13). Per verifier F2 the underlying aggregation counts the\nLATEST execution_summary per task, so task_count == the number of\ncontributing tasks and (post-dedup) == sample_event_count.",
+        "properties": {
+          "sample_event_count": {
+            "title": "Sample Event Count",
+            "type": "integer"
+          },
+          "task_count": {
+            "title": "Task Count",
+            "type": "integer"
+          },
+          "total_cost_usd": {
+            "title": "Total Cost Usd",
+            "type": "number"
+          },
+          "total_tokens": {
+            "title": "Total Tokens",
+            "type": "integer"
+          },
+          "total_turns": {
+            "title": "Total Turns",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total_cost_usd",
+          "total_tokens",
+          "total_turns",
+          "task_count",
+          "sample_event_count"
+        ],
+        "title": "CostSummary",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "title": "Agent Id",
+        "type": "string"
+      },
+      "summary": {
+        "$ref": "#/$defs/CostSummary"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "agent_id",
+      "summary"
+    ],
+    "title": "AgentCostResponse",
+    "type": "object"
+  },
   "EventsFilterResponse": {
     "$defs": {
       "Classification": {
@@ -440,6 +498,64 @@
       "vfobs"
     ],
     "title": "TaskReadResponse",
+    "type": "object"
+  },
+  "WorkgraphCostResponse": {
+    "$defs": {
+      "CostSummary": {
+        "description": "Aggregate cost rollup (plan \u00a7D3). Frozen \u2014 every field declared\n(R13). Per verifier F2 the underlying aggregation counts the\nLATEST execution_summary per task, so task_count == the number of\ncontributing tasks and (post-dedup) == sample_event_count.",
+        "properties": {
+          "sample_event_count": {
+            "title": "Sample Event Count",
+            "type": "integer"
+          },
+          "task_count": {
+            "title": "Task Count",
+            "type": "integer"
+          },
+          "total_cost_usd": {
+            "title": "Total Cost Usd",
+            "type": "number"
+          },
+          "total_tokens": {
+            "title": "Total Tokens",
+            "type": "integer"
+          },
+          "total_turns": {
+            "title": "Total Turns",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total_cost_usd",
+          "total_tokens",
+          "total_turns",
+          "task_count",
+          "sample_event_count"
+        ],
+        "title": "CostSummary",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "summary": {
+        "$ref": "#/$defs/CostSummary"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      },
+      "workgraph_id": {
+        "title": "Workgraph Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "workgraph_id",
+      "summary"
+    ],
+    "title": "WorkgraphCostResponse",
     "type": "object"
   },
   "WorkgraphReadResponse": {
