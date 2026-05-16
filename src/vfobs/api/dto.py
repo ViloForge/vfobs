@@ -94,3 +94,14 @@ class TaskEventsResponse(BaseModel):
     task_id: str
     events: list[StoredEvent]
     next_from_id: int | None = None
+
+
+class EventsFilterResponse(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    v: int = 1
+    events: list[StoredEvent]
+    next_from_id: int | None = None
+    # exactly the non-default params the request supplied (client UX
+    # + debugging — confirms the filter was understood)
+    filter_applied: dict = {}

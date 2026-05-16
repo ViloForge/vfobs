@@ -10,6 +10,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 
 from vfobs.adapters.vtf import VtfClient
 from vfobs.api.dto import (
+    EventsFilterResponse,
     TaskEventsResponse,
     TaskReadResponse,
     VfobsPart,
@@ -17,6 +18,7 @@ from vfobs.api.dto import (
     VtfWorkgraphPart,
     WorkgraphReadResponse,
 )
+from vfobs.api.query import EventQuery, build_event_query
 from vfobs.api.read_auth import Principal, bearer, get_read_principal
 from vfobs.repositories import EventRepository
 
@@ -91,4 +93,33 @@ async def get_task_events(
     )
     return TaskEventsResponse(
         task_id=task_id, events=page, next_from_id=next_from_id
+    )
+
+
+@router.get("/events", response_model=EventsFilterResponse)
+async def list_events(
+    request: Request,
+    q: EventQuery = Depends(build_event_query),
+    principal: Principal = Depends(get_read_principal),
+) -> EventsFilterResponse:
+    repo: EventRepository = request.app.state.event_repo
+    page = await repo.find_filtered(
+        workgraph_id=q.workgraph_id,
+        task_id=q.task_id,
+        agent_id=q.agent_id,
+        type_=q.type_,
+        type_namespace=q.type_namespace,
+        org_id=q.org_id,
+        from_id=q.from_id,
+        limit=q.limit,
+    )
+    next_from_id = (
+        page[-1].id + 1 if len(page) == q.limit and page else None
+    )
+    return EventsFilterResponse(
+        events=page,
+        next_from_id=next_from_id,
+        filter_applied=q.model_dump(
+            exclude_none=True, exclude_defaults=True, by_alias=True
+        ),
     )

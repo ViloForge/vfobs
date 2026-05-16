@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from vfobs.api.dto import (
+    EventsFilterResponse,
     TaskEventsResponse,
     TaskReadResponse,
     WorkgraphReadResponse,
@@ -21,6 +22,7 @@ def _schemas() -> dict:
         "WorkgraphReadResponse": WorkgraphReadResponse.model_json_schema(),
         "TaskReadResponse": TaskReadResponse.model_json_schema(),
         "TaskEventsResponse": TaskEventsResponse.model_json_schema(),
+        "EventsFilterResponse": EventsFilterResponse.model_json_schema(),
     }
 
 
