@@ -93,12 +93,22 @@ endpoints end-to-end. It needs the deployed vfobs to have a real
 vtaskforge target, so `scenario-prepare` (step 5b) now also:
 
 1. builds `viloforge/vtfstub:scenario` from
-   `scripts/scenario/vtfstub/` (a tiny FastAPI stub: `/healthz`,
-   `/v2/auth/whoami`, `/v2/workgraphs/<id>/`, `/v2/tasks/<id>/` —
-   any non-empty bearer is accepted),
+   `scripts/scenario/vtfstub/` — a tiny FastAPI stub **derived
+   from the real vtaskforge contract** (NOT invented): `/healthz`,
+   `GET /v2/auth/validate/` (DRF `Authorization: Token <t>` —
+   401 on missing/non-Token/`Token bad`, else identity),
+   `GET /v2/tasks/<id>/`, `GET /v2/milestones/<id>/`
+   (vfobs "workgraph" == vtaskforge milestone),
 2. `kind load`s it and applies
    `tests/fixtures/scenario-vtfstub.yaml` (Deployment + Service
    `vtfstub:8080`), waiting for readiness.
+
+> **OIQ3 history (2026-05-16):** the original stub faked an
+> invented `/v2/auth/whoami` + `Bearer`; real vtaskforge has
+> neither (it has `/v2/auth/validate/` + DRF `Token`). Corrected
+> in vfobs#20; the stub is now rederived from the real source.
+> See `docs/IMPLEMENTATION-STATUS.md` and kb
+> `feedback-external-contract-grounding`.
 
 `values-scenario.yaml` sets `VFOBS_VTASKFORGE_URL=http://vtfstub:8080`
 so the deployed vfobs lifespan resolves the production `VtfClient`
