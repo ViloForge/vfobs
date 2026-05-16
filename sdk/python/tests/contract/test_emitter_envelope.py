@@ -18,6 +18,7 @@ from vfobs_sdk.events import (
     task_claimed,
     task_heartbeat,
     task_state_changed,
+    task_workdir_changed,
 )
 
 _FIXTURE = (
@@ -45,6 +46,7 @@ def _events():
         harness_turn_completed(
             turn_number=1, completion_tokens=50, duration_ms=1200, **k
         ),
+        task_workdir_changed(files_changed=3, commits=1, branch="wip", **k),
     ]
 
 

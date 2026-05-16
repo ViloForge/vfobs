@@ -86,6 +86,12 @@ class _TurnCompletedData(BaseModel):
     duration_ms: int | None = None
 
 
+class _WorkdirChangedData(BaseModel):
+    files_changed: int
+    commits: int
+    branch: str | None = None
+
+
 class TaskClaimed(Event):
     type: Literal["task.claimed"] = "task.claimed"
     data: _ClaimedData
@@ -109,6 +115,11 @@ class HarnessTurnStarted(Event):
 class HarnessTurnCompleted(Event):
     type: Literal["harness.turn_completed"] = "harness.turn_completed"
     data: _TurnCompletedData
+
+
+class TaskWorkdirChanged(Event):
+    type: Literal["task.workdir_changed"] = "task.workdir_changed"
+    data: _WorkdirChangedData
 
 
 def _now(ts: datetime | None) -> datetime:
@@ -186,6 +197,21 @@ def harness_turn_completed(
         data=_TurnCompletedData(
             turn_number=turn_number,
             completion_tokens=completion_tokens, duration_ms=duration_ms,
+        ),
+        **base,
+    )
+
+
+def task_workdir_changed(
+    *, workgraph_id: str, task_id: str, source: str,
+    files_changed: int, commits: int, branch: str | None = None,
+    timestamp: datetime | None = None, **base,
+) -> TaskWorkdirChanged:
+    return TaskWorkdirChanged(
+        workgraph_id=workgraph_id, task_id=task_id, source=source,
+        timestamp=_now(timestamp),
+        data=_WorkdirChangedData(
+            files_changed=files_changed, commits=commits, branch=branch,
         ),
         **base,
     )
