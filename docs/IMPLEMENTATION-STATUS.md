@@ -82,14 +82,26 @@ cited:
   `vfobs-watch` consumes the deployed read API and produces
   correct anomaly verdicts. Repo suite: 84 unit / 3 contract /
   39 integration green.
-- 🟡 **Pending — the original goal's last mile (L4b):** a *live*
-  vafi-executor emitting in real time + `vfobs-watch` catching a
-  stall before timeout. Blocked only on redeploying
-  `vafi-executor` with T1 + the `observability` extra +
-  `VFOBS_EMIT_*` (the deployed fleet predates T1).
-- 🟡 **WG5-min T3 scenario:** the kind end-to-end scenario task
-  is specced + the stub rederived, but not yet run green
-  (was gated; folds into L4b).
+- 🟢 **L4b — emission path live & verified on vafi-dev
+  (2026-05-16):** the `vafi-executor`/`pi`/`judge` fleet is
+  redeployed on the observability-extra image (`aa32a8a`) with
+  `VFOBS_EMIT_*` + the `vfobs-ingest-token` ESO-plumbed into
+  `vafi-secrets`. Verified *in the running executor pod*:
+  `vfobs_sdk` imports, `emission._SDK_AVAILABLE == True`,
+  `build_emitter()` returns a real **`HttpEmitter`** (not
+  `NullEmitter`) pointed at the OIQ3-fixed vfobs. Executor is
+  registered + polling. **First `task.*`/`harness.*` events land
+  when it next claims a task — normal operation, not a defect.**
+  The found+fixed root cause (the image lacked the optional
+  `[observability]` extra ⇒ silent `NullEmitter`) is kb gotcha
+  `uiZQyRGr`.
+- 🟡 **Remaining = demonstration, not engineering:** a captured
+  live `vfobs-watch` STALLED-before-timeout against a real run.
+  Gated only on a claimable task existing — i.e. normal
+  vtaskforge/vafi development use, which is exactly what this
+  unblocks. The WG5-min T3 kind-scenario (specced, stub
+  rederived) is the offline equivalent and can run anytime via
+  `make scenario-prepare && make test-scenario`.
 - ⛔ **Not built (future workgraphs):** SSE streams + DAG view
   (WG3); server-side anomaly worker / cost-anomaly (WG4); full
   controller instrumentation, judge-path events (later WG5).
