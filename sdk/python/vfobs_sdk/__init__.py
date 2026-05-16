@@ -19,8 +19,10 @@ from vfobs_sdk.events import (
     task_claimed,
     task_heartbeat,
     task_state_changed,
+    task_workdir_changed,
     harness_turn_started,
     harness_turn_completed,
+    ExecutionSummary,
 )
 
 __all__ = [
@@ -34,6 +36,8 @@ __all__ = [
     "task_claimed",
     "task_heartbeat",
     "task_state_changed",
+    "task_workdir_changed",
     "harness_turn_started",
     "harness_turn_completed",
+    "ExecutionSummary",
 ]
