@@ -31,8 +31,12 @@ class WatchState:
     now: datetime
     claimed_at: datetime | None
     last_heartbeat_at: datetime | None
-    last_harness_at: datetime | None
-    max_harness_event_id: int | None
+    # Progress signal (corrected per pre-impl-review G2): the
+    # harness is an opaque buffered subprocess — it emits no
+    # mid-run events, so harness recency CANNOT mean "progressing".
+    # The DESIGN's actual stuck criterion is "workdir has not
+    # changed in N minutes" → progress = task.workdir_changed.
+    last_workdir_change_at: datetime | None
     terminal: bool
     task_timeout_s: float
 
@@ -41,8 +45,7 @@ class WatchState:
         cls, events: list[StoredEventView], *, now: datetime,
         task_timeout_s: float,
     ) -> "WatchState":
-        claimed_at = hb = harness_at = None
-        max_h = None
+        claimed_at = hb = workdir_at = None
         terminal = False
         for e in events:
             ts = _parse_ts(e.timestamp)
@@ -50,17 +53,15 @@ class WatchState:
                 claimed_at = ts if claimed_at is None else claimed_at
             elif e.type == "task.heartbeat":
                 hb = ts if hb is None or ts > hb else hb
-            elif e.type.startswith("harness."):
-                if harness_at is None or ts > harness_at:
-                    harness_at = ts
-                if max_h is None or e.id > max_h:
-                    max_h = e.id
+            elif e.type == "task.workdir_changed":
+                if workdir_at is None or ts > workdir_at:
+                    workdir_at = ts
             elif e.type == "task.state_changed":
                 if e.data.get("to_status") in _TERMINAL:
                     terminal = True
         return cls(
             now=now, claimed_at=claimed_at, last_heartbeat_at=hb,
-            last_harness_at=harness_at, max_harness_event_id=max_h,
+            last_workdir_change_at=workdir_at,
             terminal=terminal, task_timeout_s=task_timeout_s,
         )
 
@@ -95,7 +96,9 @@ class Crashed(AnomalyRule):
 
 class Stall(AnomalyRule):
     """The exact pi-hang signal: alive (heartbeats fresh) but no
-    harness progress for too long."""
+    workdir progress for too long. (Input corrected per pre-impl-
+    review G2 — was harness recency, which is unobservable mid-run
+    because the harness is an opaque buffered subprocess.)"""
 
     def __init__(self, stall_s: float = 60.0, crash_s: float = 120.0) -> None:
         self._stall = stall_s
@@ -107,14 +110,17 @@ class Stall(AnomalyRule):
         hb_age = (s.now - s.last_heartbeat_at).total_seconds()
         if hb_age > self._crash:
             return None  # that's Crashed's call, not Stall's
-        progressed_at = s.last_harness_at or s.claimed_at
+        # progress = workdir change; before any workdir change,
+        # measure from claim (a task that never touches its workdir
+        # within stall_s IS the pi-hang).
+        progressed_at = s.last_workdir_change_at or s.claimed_at
         if progressed_at is None:
             return None
         prog_age = (s.now - progressed_at).total_seconds()
         if prog_age > self._stall:
             return Verdict(
                 "STALLED",
-                f"alive (hb {hb_age:.0f}s) but no harness progress "
+                f"alive (hb {hb_age:.0f}s) but no workdir progress "
                 f"for {prog_age:.0f}s",
             )
         return None
