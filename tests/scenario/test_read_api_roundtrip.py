@@ -72,7 +72,11 @@ def test_full_read_path_after_seed(vfobs_port):
     w = httpx.get(f"{base}/workgraphs/{wg}", headers=READ_H, timeout=30)
     assert w.status_code == 200, w.text
     wb = w.json()
-    assert wb["vtf"]["kind"] == "infrastructure"  # came from vtfstub
+    # vtf metadata is the REAL milestone projection (MilestoneV2Serializer
+    # has no `kind` field — verified vtaskforge serializers_v2.py:43).
+    # Assert the grounded fields the vtfstub actually returns.
+    assert wb["vtf"]["name"] == "Stub Milestone"  # came from vtfstub
+    assert wb["vtf"]["status"] == "doing"
     assert wb["vfobs"]["event_count"] == 4
     assert wb["vfobs"]["last_event_id"] >= last_rw
 
