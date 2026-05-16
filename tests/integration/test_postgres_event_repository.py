@@ -1,4 +1,3 @@
-import asyncio
 import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
@@ -7,7 +6,7 @@ import pytest
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from vfobs.events import EventFactory
-from vfobs.repositories import EventRepository, InMemoryEventRepository, PostgresEventRepository
+from vfobs.repositories import InMemoryEventRepository, PostgresEventRepository
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -150,3 +149,80 @@ async def test_lsp_both_repos_round_trip_an_event(repo_under_test):
 @pytest.mark.integration
 async def test_lsp_both_repos_return_none_for_missing(repo_under_test):
     assert await repo_under_test.get_by_id(999999999) is None
+
+
+# ---- WG2-T1 LSP: find_* + cost_summary, one contract, both impls ---------
+
+from vfobs.events.namespaces.task import ExecutionSummary  # noqa: E402
+
+
+@pytest.mark.integration
+async def test_lsp_find_by_workgraph_wraps_storedevent_ordered(repo_under_test):
+    i1 = await repo_under_test.store(_state_changed(workgraph_id="wg_f1"))
+    await repo_under_test.store(_state_changed(workgraph_id="wg_other"))
+    i3 = await repo_under_test.store(_state_changed(workgraph_id="wg_f1"))
+
+    got = await repo_under_test.find_by_workgraph("wg_f1")
+    assert [se.id for se in got] == sorted([i1, i3])  # id ASC
+    assert all(se.event.workgraph_id == "wg_f1" for se in got)
+    assert got[0].model_dump()["id"] == got[0].id  # F1 survives dump
+
+
+@pytest.mark.integration
+async def test_lsp_find_by_task_and_from_id_cursor(repo_under_test):
+    ids = [
+        await repo_under_test.store(
+            _state_changed(workgraph_id="wg_cur", task_id="t_cur")
+        )
+        for _ in range(4)
+    ]
+    page = await repo_under_test.find_by_task(
+        "t_cur", from_id=ids[1], limit=2
+    )
+    assert [se.id for se in page] == [ids[1], ids[2]]  # inclusive cursor
+
+
+@pytest.mark.integration
+async def test_lsp_find_filtered_and_combined(repo_under_test):
+    hit = await repo_under_test.store(
+        _state_changed(workgraph_id="wg_ff", task_id="t_a", agent_id="ag_1")
+    )
+    await repo_under_test.store(
+        _state_changed(workgraph_id="wg_ff", task_id="t_b", agent_id="ag_2")
+    )
+    got = await repo_under_test.find_filtered(
+        workgraph_id="wg_ff", agent_id="ag_1", type_namespace="task"
+    )
+    assert [se.id for se in got] == [hit]
+
+
+@pytest.mark.integration
+async def test_lsp_cost_summary_dedup_and_scope(repo_under_test):
+    with pytest.raises(ValueError):
+        await repo_under_test.cost_summary()
+
+    await repo_under_test.store(
+        _state_changed(
+            workgraph_id="wg_cost", task_id="t_rw",
+            execution_summary=ExecutionSummary(
+                num_turns=1, total_tokens=10, cost_usd=0.10),
+        )
+    )
+    await repo_under_test.store(
+        _state_changed(
+            workgraph_id="wg_cost", task_id="t_rw",
+            execution_summary=ExecutionSummary(
+                num_turns=5, total_tokens=99, cost_usd=0.40),
+        )
+    )
+    # in-flight task with no summary -> excluded
+    await repo_under_test.store(
+        _state_changed(workgraph_id="wg_cost", task_id="t_inflight")
+    )
+
+    cs = await repo_under_test.cost_summary(workgraph_id="wg_cost")
+    assert cs.task_count == 1  # F2: reworked t_rw counted once
+    assert cs.sample_event_count == 1
+    assert cs.total_cost_usd == pytest.approx(0.40)  # latest run wins
+    assert cs.total_tokens == 99
+    assert cs.total_turns == 5

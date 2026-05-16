@@ -28,6 +28,12 @@ class Event(BaseModel):
 
     model_config = ConfigDict(frozen=True, str_strip_whitespace=True)
 
+    # NOTE (verifier F1, mechanism R2): the DB id is deliberately NOT
+    # on Event. Event is the write/ingest wire model and its v1 schema
+    # is locked (tests/fixtures/event_schemas.v1.json). The stored id
+    # is read-side metadata — it rides on the StoredEvent read model
+    # (repositories.StoredEvent) returned by find_*, never polluting
+    # the ingest contract.
     v: int = 1
     type: str
     workgraph_id: str = Field(min_length=1)
