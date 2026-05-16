@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from vfobs.adapters.vtf import VtfClient
-from vfobs.api import events, health
+from vfobs.api import events, health, reads
 from vfobs.api.auth import IngestAuth, StaticTokenAuth
 from vfobs.api.read_auth import ReadAuth, VtfTokenAuth
 from vfobs.config import Settings, get_settings
@@ -64,5 +64,6 @@ def create_app(
     app.add_middleware(RequestLoggingMiddleware)
     app.include_router(health.router)
     app.include_router(events.router)
+    app.include_router(reads.router)
     app.mount("/metrics", metrics_asgi_app())
     return app
