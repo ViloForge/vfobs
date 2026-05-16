@@ -66,16 +66,15 @@ def live_url():
             claimed_by_agent_id="a", timestamp=at(0)))
         await repo.store(EventFactory.task_heartbeat(
             workgraph_id="wg", task_id="h", source="s", timestamp=at(395)))
-        await repo.store(EventFactory.harness_turn_completed(
+        # healthy: workdir changed recently (the progress signal)
+        await repo.store(EventFactory.task_workdir_changed(
             workgraph_id="wg", task_id="h", source="s",
-            turn_number=2, timestamp=at(396)))
-        # stalled task s: claimed + FRESH heartbeats but harness 380s ago
+            files_changed=2, commits=0, timestamp=at(396)))
+        # stalled task s: claimed + FRESH heartbeats but the workdir
+        # has NEVER changed (the exact pi-hang — alive, not progressing)
         await repo.store(EventFactory.task_claimed(
             workgraph_id="wg", task_id="s", source="s",
             claimed_by_agent_id="a", timestamp=at(0)))
-        await repo.store(EventFactory.harness_turn_started(
-            workgraph_id="wg", task_id="s", source="s",
-            turn_number=1, model="m", timestamp=at(15)))
         await repo.store(EventFactory.task_heartbeat(
             workgraph_id="wg", task_id="s", source="s", timestamp=at(398)))
 
