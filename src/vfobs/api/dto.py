@@ -12,40 +12,39 @@ from vfobs.repositories import StoredEvent
 
 
 class VtfWorkgraphPart(BaseModel):
+    # Grounded to the real milestone projection (vfobs "workgraph"
+    # == vtaskforge milestone). Fields per MilestoneV2Serializer.
     model_config = ConfigDict(frozen=True)
 
-    status: str
-    kind: str | None = None
-    target_repos: list[str] = []
-    tags: list[str] = []
-    created_at: str | None = None
+    status: str | None = None
+    name: str | None = None
+    description: str | None = None
+    order: int | None = None
 
     @classmethod
     def from_metadata(cls, m: WorkgraphMetadata) -> "VtfWorkgraphPart":
         return cls(
             status=m.status,
-            kind=m.kind,
-            target_repos=m.target_repos,
-            tags=m.tags,
-            created_at=m.created_at,
+            name=m.name,
+            description=m.description,
+            order=m.order,
         )
 
 
 class VtfTaskPart(BaseModel):
+    # Grounded to the real TaskV2Serializer projection.
     model_config = ConfigDict(frozen=True)
 
-    status: str
+    status: str | None = None
     title: str | None = None
-    workgraph_id: str | None = None
-    created_at: str | None = None
+    description: str | None = None
 
     @classmethod
     def from_metadata(cls, m: TaskMetadata) -> "VtfTaskPart":
         return cls(
             status=m.status,
             title=m.title,
-            workgraph_id=m.workgraph_id,
-            created_at=m.created_at,
+            description=m.description,
         )
 
 

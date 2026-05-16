@@ -1,66 +1,95 @@
-"""Integration: VtfClient against a real httpx transport hitting a
-fake-vtaskforge ASGI app (no MockTransport). Verifies the full
-request shape — Authorization passthrough, URL composition, timeout
-config — over a real ASGI round-trip.
+"""Integration: VtfClient against a real ASGI round-trip whose
+fake vtaskforge is DERIVED FROM THE REAL CONTRACT (kb
+feedback-external-contract-grounding): DRF `Token` scheme,
+GET /v2/auth/validate/ (200 identity / 401), GET /v2/tasks/<id>/,
+GET /v2/milestones/<id>/.
 """
 
 import httpx
 import pytest
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header
+from fastapi.responses import JSONResponse
 from pydantic import SecretStr
 
-from vfobs.adapters.dto import TaskMetadata, WhoamiPrincipal, WorkgraphMetadata
+from vfobs.adapters.dto import TaskMetadata, VtfPrincipal, WorkgraphMetadata
+from vfobs.adapters.vtf import VtfAuthError, VtfClient
 from vfobs.config import Settings
-from vfobs.adapters.vtf import VtfClient
 
 BASE = "http://vtf.local"
 
 
 def _fake_vtaskforge() -> FastAPI:
+    """Mirrors real vtaskforge: requires `Authorization: Token <t>`;
+    a non-Token / "bad" token → 401 (like DRF IsAuthenticated)."""
     app = FastAPI()
     seen: dict[str, str] = {}
 
-    @app.get("/v2/auth/whoami")
-    def whoami(authorization: str = Header(...)) -> dict:
-        seen["auth"] = authorization
-        return {"user_id": "live-op", "display_name": "Live Op"}
+    def _check(authorization: str | None):
+        seen["auth"] = authorization or ""
+        if not authorization or not authorization.startswith("Token "):
+            return False
+        return authorization != "Token bad"
 
-    @app.get("/v2/workgraphs/{wid}/")
-    def get_wg(wid: str) -> dict:
-        if wid == "nope":
-            raise HTTPException(status_code=404)
-        return {"id": wid, "status": "doing", "target_repos": [], "tags": []}
+    @app.get("/v2/auth/validate/")
+    def validate(authorization: str = Header(default="")):
+        if not _check(authorization):
+            return JSONResponse({"detail": "Invalid token."}, status_code=401)
+        return {
+            "user_id": 42, "username": "live-op",
+            "user_type": "human", "is_staff": False, "projects": [],
+        }
 
     @app.get("/v2/tasks/{tid}/")
-    def get_task(tid: str) -> dict:
-        return {"id": tid, "workgraph_id": "wg_x", "status": "doing"}
+    def get_task(tid: str, authorization: str = Header(default="")):
+        if not _check(authorization):
+            return JSONResponse({"detail": "x"}, status_code=401)
+        return {"id": tid, "title": "Live Task", "status": "doing"}
+
+    @app.get("/v2/milestones/{mid}/")
+    def get_ms(mid: str, authorization: str = Header(default="")):
+        if not _check(authorization):
+            return JSONResponse({"detail": "x"}, status_code=401)
+        return {"id": mid, "name": "Live MS", "status": "doing"}
 
     app.state.seen = seen
     return app
 
 
-@pytest.mark.integration
-async def test_adapter_live_round_trip() -> None:
-    fake = _fake_vtaskforge()
-    transport = httpx.ASGITransport(app=fake)
-    http = httpx.AsyncClient(transport=transport, base_url=BASE, timeout=5)
+def _client(fake) -> VtfClient:
+    http = httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=fake), base_url=BASE, timeout=5
+    )
     settings = Settings(
         database_url="postgresql+asyncpg://u:p@localhost/db",  # type: ignore[arg-type]
         ingest_token=SecretStr("x"),
         vtaskforge_url=BASE,  # type: ignore[arg-type]
     )
-    client = VtfClient(settings, http=http)
+    return VtfClient(settings, http=http)
 
-    who = await client.whoami("live-tok")
-    wg = await client.get_workgraph("wg_1", "live-tok")
-    task = await client.get_task("t_1", "live-tok")
-    missing = await client.get_workgraph("nope", "live-tok")
-    await client.aclose()
 
-    assert who == WhoamiPrincipal(user_id="live-op", display_name="Live Op")
-    assert wg == WorkgraphMetadata(id="wg_1", status="doing")
-    assert task == TaskMetadata(id="t_1", workgraph_id="wg_x", status="doing")
-    # 404 path: fake returns 404 for "nope" -> adapter maps to None.
-    assert missing is None
-    # Authorization header passthrough verified end-to-end.
-    assert fake.state.seen["auth"] == "Bearer live-tok"
+@pytest.mark.integration
+async def test_adapter_live_round_trip_token_scheme():
+    fake = _fake_vtaskforge()
+    c = _client(fake)
+    p = await c.validate_token("live-tok")
+    wg = await c.get_workgraph("wg_1", "live-tok")
+    task = await c.get_task("t_1", "live-tok")
+    await c.aclose()
+
+    assert p == VtfPrincipal(
+        user_id=42, username="live-op", user_type="human", is_staff=False
+    )
+    assert wg == WorkgraphMetadata(id="wg_1", name="Live MS", status="doing")
+    assert task == TaskMetadata(id="t_1", title="Live Task", status="doing")
+    # The grounded contract: DRF Token scheme, end-to-end.
+    assert fake.state.seen["auth"] == "Token live-tok"
+
+
+@pytest.mark.integration
+async def test_adapter_live_bad_token_denies_not_500():
+    c = _client(_fake_vtaskforge())
+    with pytest.raises(VtfAuthError):
+        await c.validate_token("bad")
+    # metadata calls fail-safe to None under a bad token
+    assert await c.get_task("t_1", "bad") is None
+    await c.aclose()

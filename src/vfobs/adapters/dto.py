@@ -1,37 +1,53 @@
-"""Typed projections of vtaskforge resources (Adapter pattern, plan §D2).
+"""Typed projections of vtaskforge resources (Adapter pattern).
 
-vfobs deliberately does NOT mirror vtaskforge's full schema — these
-models capture only the fields the WG2 read endpoints surface. All
-frozen (R13: every key declared; no undeclared-key mutation anywhere
-downstream).
+GROUNDED against the real vtaskforge source (not invented — see
+kb feedback-external-contract-grounding). Citations:
+- principal: vtaskforge src/prefs/views.py:125 TokenValidationView
+  .get → {user_id, username, user_type, is_staff, projects}
+- task: src/tasks/serializers_v2.py:30 TaskV2Serializer →
+  id, title, description, status, project, workplan, milestone
+- milestone (== vfobs "workgraph", D-T1-impl-1):
+  src/workplans/serializers_v2.py:43 MilestoneV2Serializer →
+  id, name, description, status, order, workplan
+
+All frozen; extra='ignore' so a vtaskforge schema addition can't
+break the adapter.
 """
 
 from pydantic import BaseModel, ConfigDict
 
 
-class WhoamiPrincipal(BaseModel):
-    model_config = ConfigDict(frozen=True)
+class VtfPrincipal(BaseModel):
+    """Identity from GET /v2/auth/validate/ (200)."""
 
-    user_id: str
-    display_name: str | None = None
+    model_config = ConfigDict(frozen=True, extra="ignore")
+
+    user_id: int | str
+    username: str | None = None
+    user_type: str | None = None
+    is_staff: bool = False
 
 
 class WorkgraphMetadata(BaseModel):
-    model_config = ConfigDict(frozen=True)
+    """vfobs "workgraph" == vtaskforge milestone. From
+    /v2/milestones/<id>/ (MilestoneV2Serializer)."""
 
-    id: str
-    status: str
-    kind: str | None = None
-    target_repos: list[str] = []
-    tags: list[str] = []
-    created_at: str | None = None  # ISO 8601
+    model_config = ConfigDict(frozen=True, extra="ignore")
+
+    id: int | str
+    name: str | None = None
+    status: str | None = None
+    description: str | None = None
+    order: int | None = None
+    workplan: str | int | None = None
 
 
 class TaskMetadata(BaseModel):
-    model_config = ConfigDict(frozen=True)
+    """From /v2/tasks/<id>/ (TaskV2Serializer)."""
 
-    id: str
-    workgraph_id: str | None = None
-    status: str
+    model_config = ConfigDict(frozen=True, extra="ignore")
+
+    id: int | str
     title: str | None = None
-    created_at: str | None = None  # ISO 8601
+    status: str | None = None
+    description: str | None = None

@@ -42,17 +42,18 @@ def _run_alembic_upgrade(database_url: str) -> None:
 
 
 def _fake_vtf() -> FastAPI:
+    # Grounded contract: workgraph == milestone (/v2/milestones/),
+    # real serializer fields (no kind/target_repos/tags).
     app = FastAPI()
 
-    @app.get("/v2/workgraphs/{wid}/")
-    def wg(wid: str) -> dict:
-        return {"id": wid, "status": "doing", "kind": "infrastructure",
-                "target_repos": ["viloforge/vfobs"], "tags": []}
+    @app.get("/v2/milestones/{mid}/")
+    def ms(mid: str) -> dict:
+        return {"id": mid, "name": "Live MS", "status": "doing",
+                "order": 0}
 
     @app.get("/v2/tasks/{tid}/")
     def task(tid: str) -> dict:
-        return {"id": tid, "workgraph_id": "wg_live", "status": "doing",
-                "title": "Live Task"}
+        return {"id": tid, "title": "Live Task", "status": "doing"}
 
     return app
 
@@ -114,7 +115,7 @@ async def test_reads_live_compose_real_pg_and_fake_vtf(vfobs_database_url):
                 )
             ).json()
 
-    assert wg["vtf"]["kind"] == "infrastructure"
+    assert wg["vtf"]["name"] == "Live MS"
     assert wg["vfobs"]["event_count"] == 5
     assert wg["vfobs"]["last_event_id"] == seeded[-1]
     assert [e["id"] for e in ev["events"]] == seeded[:3]

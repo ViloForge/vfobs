@@ -60,13 +60,13 @@ def _app(repo, *, vtf, read_auth=None):
 async def test_get_workgraph_happy_path_composes_vtf_and_vfobs():
     repo = InMemoryEventRepository()
     eid = await repo.store(_ev("wg_1"))
-    vtf = FakeVtf(wg=WorkgraphMetadata(id="wg_1", status="doing", kind="infra"))
+    vtf = FakeVtf(wg=WorkgraphMetadata(id="wg_1", status="doing", name="M1"))
     with TestClient(_app(repo, vtf=vtf)) as c:
         r = c.get("/workgraphs/wg_1", headers={"Authorization": "Bearer t"})
     assert r.status_code == 200
     b = r.json()
     assert b["v"] == 1 and b["workgraph_id"] == "wg_1"
-    assert b["vtf"]["status"] == "doing" and b["vtf"]["kind"] == "infra"
+    assert b["vtf"]["status"] == "doing" and b["vtf"]["name"] == "M1"
     assert b["vfobs"]["event_count"] == 1
     assert b["vfobs"]["last_event_id"] == eid
     assert b["vfobs"]["last_event_type"] == "task.state_changed"
