@@ -1,4 +1,159 @@
 {
+  "EventsFilterResponse": {
+    "$defs": {
+      "Classification": {
+        "enum": [
+          "public",
+          "internal",
+          "secret"
+        ],
+        "title": "Classification",
+        "type": "string"
+      },
+      "Event": {
+        "description": "Base for every vfobs event. Concrete subclasses fix `type` to a\nLiteral and define a typed `data` sub-model.",
+        "properties": {
+          "agent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Agent Id"
+          },
+          "classification": {
+            "$ref": "#/$defs/Classification",
+            "default": "internal"
+          },
+          "cluster_id": {
+            "default": "vafi-dev",
+            "title": "Cluster Id",
+            "type": "string"
+          },
+          "org_id": {
+            "default": "viloforge",
+            "title": "Org Id",
+            "type": "string"
+          },
+          "source": {
+            "minLength": 1,
+            "title": "Source",
+            "type": "string"
+          },
+          "task_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Task Id"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "title": "Timestamp",
+            "type": "string"
+          },
+          "trace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Trace Id"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "v": {
+            "default": 1,
+            "title": "V",
+            "type": "integer"
+          },
+          "workgraph_id": {
+            "minLength": 1,
+            "title": "Workgraph Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "workgraph_id",
+          "source",
+          "timestamp"
+        ],
+        "title": "Event",
+        "type": "object"
+      },
+      "StoredEvent": {
+        "description": "Read model (verifier F1, mechanism R2): a persisted event plus\nits DB-assigned id. Keeps the storage id off the write/ingest\n`Event` model \u2014 Event's locked v1 schema is untouched. find_*\nreturn these; read endpoints serialize {id, event}. get_by_id\nintentionally keeps returning a bare Event (D-T1-1).",
+        "properties": {
+          "event": {
+            "$ref": "#/$defs/Event"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "event"
+        ],
+        "title": "StoredEvent",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "events": {
+        "items": {
+          "$ref": "#/$defs/StoredEvent"
+        },
+        "title": "Events",
+        "type": "array"
+      },
+      "filter_applied": {
+        "additionalProperties": true,
+        "default": {},
+        "title": "Filter Applied",
+        "type": "object"
+      },
+      "next_from_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Next From Id"
+      },
+      "v": {
+        "default": 1,
+        "title": "V",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "events"
+    ],
+    "title": "EventsFilterResponse",
+    "type": "object"
+  },
   "TaskEventsResponse": {
     "$defs": {
       "Classification": {
