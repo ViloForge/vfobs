@@ -420,7 +420,7 @@
       },
       "VtfTaskPart": {
         "properties": {
-          "created_at": {
+          "description": {
             "anyOf": [
               {
                 "type": "string"
@@ -430,11 +430,19 @@
               }
             ],
             "default": null,
-            "title": "Created At"
+            "title": "Description"
           },
           "status": {
-            "title": "Status",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
           },
           "title": {
             "anyOf": [
@@ -447,23 +455,8 @@
             ],
             "default": null,
             "title": "Title"
-          },
-          "workgraph_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Workgraph Id"
           }
         },
-        "required": [
-          "status"
-        ],
         "title": "VtfTaskPart",
         "type": "object"
       }
@@ -612,7 +605,7 @@
       },
       "VtfWorkgraphPart": {
         "properties": {
-          "created_at": {
+          "description": {
             "anyOf": [
               {
                 "type": "string"
@@ -622,9 +615,9 @@
               }
             ],
             "default": null,
-            "title": "Created At"
+            "title": "Description"
           },
-          "kind": {
+          "name": {
             "anyOf": [
               {
                 "type": "string"
@@ -634,32 +627,33 @@
               }
             ],
             "default": null,
-            "title": "Kind"
+            "title": "Name"
+          },
+          "order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order"
           },
           "status": {
-            "title": "Status",
-            "type": "string"
-          },
-          "tags": {
-            "default": [],
-            "items": {
-              "type": "string"
-            },
-            "title": "Tags",
-            "type": "array"
-          },
-          "target_repos": {
-            "default": [],
-            "items": {
-              "type": "string"
-            },
-            "title": "Target Repos",
-            "type": "array"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
           }
         },
-        "required": [
-          "status"
-        ],
         "title": "VtfWorkgraphPart",
         "type": "object"
       }

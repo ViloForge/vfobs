@@ -3,27 +3,30 @@ import hashlib
 import pytest
 from fastapi import HTTPException
 
-from vfobs.adapters.dto import WhoamiPrincipal
+from vfobs.adapters.dto import VtfPrincipal
 from vfobs.adapters.vtf import VtfAuthError
 from vfobs.api.read_auth import (
     Principal,
     StaticPrincipalAuth,
     VtfTokenAuth,
     _hash_prefix,
+    get_read_principal,
 )
 
 
 class FakeVtf:
-    """Stub VtfClient — counts whoami calls; no network."""
+    """Stub VtfClient — counts validate_token calls; no network.
+    Models the REAL grounded contract (validate_token →
+    VtfPrincipal | VtfAuthError)."""
 
-    def __init__(self, principal: WhoamiPrincipal | None = None) -> None:
+    def __init__(self, principal: VtfPrincipal | None = None) -> None:
         self.calls = 0
-        self._principal = principal or WhoamiPrincipal(
-            user_id="op", display_name="Op"
+        self._principal = principal or VtfPrincipal(
+            user_id=7, username="op"
         )
         self.raise_auth = False
 
-    async def whoami(self, token: str) -> WhoamiPrincipal:
+    async def validate_token(self, token: str) -> VtfPrincipal:
         self.calls += 1
         if self.raise_auth:
             raise VtfAuthError("bad")
@@ -38,7 +41,9 @@ async def test_cold_miss_calls_whoami_warm_hit_does_not() -> None:
     p1 = await auth.verify("tok")
     p2 = await auth.verify("tok")
 
-    assert p1 == p2 == Principal(user_id="op", display_name="Op")
+    # read_auth maps VtfPrincipal(user_id=7, username="op") →
+    # Principal(user_id="7", display_name="op")
+    assert p1 == p2 == Principal(user_id="7", display_name="op")
     assert vtf.calls == 1  # second call served from cache
 
 
@@ -99,3 +104,19 @@ async def test_static_principal_auth_returns_fixed_for_any_token() -> None:
     auth = StaticPrincipalAuth(fixed)
     assert await auth.verify("anything") is fixed
     assert await auth.verify(None) is fixed
+
+
+@pytest.mark.unit
+async def test_get_read_principal_503_when_read_auth_unwired() -> None:
+    """D-T0-1 degrade fix: read_auth=None ⇒ clean 503, NOT the
+    AttributeError 500 that prod actually hit."""
+    class _App:
+        class state:  # noqa: N801
+            read_auth = None
+
+    class _Req:
+        app = _App()
+
+    with pytest.raises(HTTPException) as ei:
+        await get_read_principal(_Req(), creds=None)
+    assert ei.value.status_code == 503

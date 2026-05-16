@@ -59,13 +59,13 @@ class VtfTokenAuth(ReadAuth):
         if cached is not None and (now - cached[1]) < self._ttl:
             return cached[0]
         try:
-            who = await self._vtf.whoami(token)
+            who = await self._vtf.validate_token(token)
         except VtfAuthError:
             raise HTTPException(
-                status.HTTP_401_UNAUTHORIZED, "Invalid bearer token"
+                status.HTTP_401_UNAUTHORIZED, "Invalid token"
             ) from None
         principal = Principal(
-            user_id=who.user_id, display_name=who.display_name
+            user_id=str(who.user_id), display_name=who.username
         )
         self._cache[key] = (principal, now)
         return principal
@@ -86,5 +86,13 @@ async def get_read_principal(
     request: Request,
     creds: HTTPAuthorizationCredentials | None = Depends(bearer),
 ) -> Principal:
-    auth: ReadAuth = request.app.state.read_auth
+    auth: ReadAuth | None = request.app.state.read_auth
+    if auth is None:
+        # D-T0-1 degrade: VFOBS_VTASKFORGE_URL unset ⇒ lifespan
+        # left read auth unwired. Surface a clear 503 (the ratified
+        # promise) — NOT an AttributeError 500.
+        raise HTTPException(
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+            "read API not configured (VFOBS_VTASKFORGE_URL unset)",
+        )
     return await auth.verify(creds.credentials if creds else None)
