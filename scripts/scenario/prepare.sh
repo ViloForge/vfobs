@@ -51,9 +51,12 @@ echo "==> deploying postgres (postgres:15-alpine) via kubectl apply"
 kubectl --context "kind-$CLUSTER" apply -f tests/fixtures/scenario-postgres.yaml -n "$NS"
 
 echo "==> waiting for postgres pod readiness"
-kubectl --context "kind-$CLUSTER" wait --for=condition=ready pod \
-  -l app.kubernetes.io/name=vfobs-pg \
-  -n "$NS" --timeout=120s
+# rollout status (not `wait --for=condition=ready pod`): the bare pod wait
+# errors immediately with "no matching resources found" when it races ahead
+# of the Deployment creating its pod. rollout status waits for the
+# Deployment to exist and become Available.
+kubectl --context "kind-$CLUSTER" -n "$NS" \
+  rollout status deployment/vfobs-pg --timeout=120s
 
 # ---- 4. schema bootstrap -----------------------------------------------------
 
@@ -94,8 +97,8 @@ echo "==> loading vtfstub image into kind"
 kind load docker-image "viloforge/vtfstub:$IMAGE_TAG" --name "$CLUSTER"
 echo "==> deploying vtfstub"
 kubectl --context "kind-$CLUSTER" apply -f tests/fixtures/scenario-vtfstub.yaml -n "$NS"
-kubectl --context "kind-$CLUSTER" wait --for=condition=ready pod \
-  -l app.kubernetes.io/name=vtfstub -n "$NS" --timeout=120s
+kubectl --context "kind-$CLUSTER" -n "$NS" \
+  rollout status deployment/vtfstub --timeout=120s
 
 # ---- 6. literal secret + helm install vfobs ---------------------------------
 
@@ -112,8 +115,9 @@ helm --kube-context "kind-$CLUSTER" upgrade --install vfobs ./charts/vfobs \
 # ---- 7. readiness ------------------------------------------------------------
 
 echo "==> waiting for vfobs pod readiness"
-kubectl --context "kind-$CLUSTER" wait --for=condition=ready pod \
-  -l app.kubernetes.io/name=vfobs \
-  -n "$NS" --timeout=120s
+# helm --wait above already blocks on readiness; rollout status keeps this
+# consistent with the other readiness gates and is a no-op if already rolled.
+kubectl --context "kind-$CLUSTER" -n "$NS" \
+  rollout status deployment/vfobs --timeout=120s
 
 echo "==> scenario environment ready"

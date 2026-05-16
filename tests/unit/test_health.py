@@ -2,7 +2,6 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi import FastAPI
-from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
 from vfobs.api.health import healthz, readyz
