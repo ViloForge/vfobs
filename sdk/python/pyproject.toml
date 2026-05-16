@@ -20,7 +20,8 @@ dev = [
     "jsonschema>=4.0",
 ]
 
-# [project.scripts] vfobs-watch is added by WG5m-T2 (watch.py).
+[project.scripts]
+vfobs-watch = "vfobs_sdk.watch:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
